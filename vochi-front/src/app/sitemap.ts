@@ -1,0 +1,11 @@
+import type { MetadataRoute } from "next";
+
+const BASE_URL = "https://vochi.soldierty.app";
+
+export default function sitemap(): MetadataRoute.Sitemap {
+  return [
+    { url: BASE_URL, lastModified: new Date(), priority: 1.0 },
+    { url: `${BASE_URL}/privacy`, lastModified: new Date(), priority: 0.3 },
+    { url: `${BASE_URL}/terms`, lastModified: new Date(), priority: 0.3 },
+  ];
+}

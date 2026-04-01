@@ -1,6 +1,6 @@
 "use client";
 
-import { getIdToken } from "@/lib/auth-client";
+import { getIdToken, logout } from "@/lib/auth-client";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL!;
 
@@ -24,8 +24,16 @@ export async function apiFetch(path: string, init: RequestInit = {}) {
 
   headers.set("Authorization", `Bearer ${token}`);
 
-  return fetch(buildApiUrl(path), {
+  const res = await fetch(buildApiUrl(path), {
     ...init,
     headers,
   });
+
+  if (res.status === 401) {
+    await logout();
+    window.location.href = "/login";
+    throw new Error("No autorizado");
+  }
+
+  return res;
 }

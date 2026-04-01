@@ -1,14 +1,17 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
 import { NavbarApp } from "./NavbarApp";
 import { useAuth } from "@/providers/SessionProvider";
+import { apiFetch } from "@/lib/api";
+import { logout } from "@/lib/auth-client";
 
 export function MainShell({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
   const pathname = usePathname();
   const router = useRouter();
+  const [verified, setVerified] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -16,7 +19,32 @@ export function MainShell({ children }: { children: React.ReactNode }) {
     }
   }, [loading, pathname, router, user]);
 
-  if (loading || !user) {
+  useEffect(() => {
+    if (loading || !user) return;
+
+    let cancelled = false;
+
+    apiFetch("/auth/verify")
+      .then((res) => {
+        if (cancelled) return;
+        if (!res.ok) {
+          logout().then(() => router.replace("/login"));
+        } else {
+          setVerified(true);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          logout().then(() => router.replace("/login"));
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [loading, user, router]);
+
+  if (loading || !user || !verified) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center px-6">
         <div className="flex flex-col items-center gap-8 max-w-xs text-center">

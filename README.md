@@ -257,6 +257,7 @@ Vochi está 100% desplegado en **[CubePath](https://cubepath.com)** usando un se
    - `OPENAI_API_KEY` — API key de OpenAI
    - `GROQ_API_KEY` — API key de Groq
    - `FRONTEND_URL` — `https://vochi.soldierty.app`
+   - `ALLOWED_EMAILS` — Emails permitidos
 5. **Desplegar Frontend** — Conectar repo Git, configurar:
    - `NEXT_PUBLIC_API_URL` — `https://api.vochi.soldierty.app`
    - `NEXT_PUBLIC_FIREBASE_*` — Config Firebase

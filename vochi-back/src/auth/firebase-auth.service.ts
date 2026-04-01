@@ -27,12 +27,18 @@ type UserProfile = {
 @Injectable()
 export class FirebaseAuthService {
   private readonly firebaseApp: App;
+  private readonly ALLOWED_EMAILS: string[];
 
   constructor(
     private readonly configService: ConfigService,
     private readonly prisma: PrismaService,
   ) {
     this.firebaseApp = this.getOrCreateFirebaseApp();
+    this.ALLOWED_EMAILS =
+      this.configService
+        .get<string>('ALLOWED_EMAILS')
+        ?.split(',')
+        .map((email) => email.trim().toLowerCase()) ?? [];
   }
 
   async authenticate(idToken: string): Promise<AuthenticatedUser> {
@@ -47,6 +53,11 @@ export class FirebaseAuthService {
       decodedToken = await getAuth(this.firebaseApp).verifyIdToken(token);
     } catch {
       throw new UnauthorizedException('Token inválido o expirado');
+    }
+
+    const email = decodedToken.email?.toLowerCase();
+    if (!email || !this.ALLOWED_EMAILS.includes(email)) {
+      throw new UnauthorizedException('No tenés acceso a esta aplicación');
     }
 
     return this.resolveUser(decodedToken);

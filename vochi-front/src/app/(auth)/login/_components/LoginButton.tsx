@@ -1,7 +1,8 @@
 "use client";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
-import { loginWithGoogle } from "@/lib/auth-client";
+import { loginWithGoogle, logout } from "@/lib/auth-client";
+import { apiFetch } from "@/lib/api";
 import toast from "react-hot-toast";
 
 export function LoginButton() {
@@ -14,10 +15,18 @@ export function LoginButton() {
 
     try {
       await loginWithGoogle();
+      const res = await apiFetch("/auth/verify");
+
+      if (!res.ok) {
+        await logout();
+        toast.error("No tenés acceso a esta aplicación.");
+        setIsLoading(false);
+        return;
+      }
       router.push(searchParams.get("next") || "/setup");
     } catch (error) {
       console.error("No se pudo iniciar sesion con Google", error);
-      toast.error("No se pudo iniciar sesión con Google. Intentá de nuevo.");
+      toast.error("No se pudo iniciar sesión. Intentá de nuevo.");
       setIsLoading(false);
     }
   }
